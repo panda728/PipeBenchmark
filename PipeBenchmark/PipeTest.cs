@@ -58,9 +58,11 @@ namespace PipeBenchmark
         public async Task UseStreamReaderAsync()
         {
             var input = new MemoryStream(_input);
-            var output = new MockStream();
-            var details = Import(input);
-            await WriteFileAsync(output, details);
+            using (var output = new MockStreamWriter(new MemoryStream(), _enc))
+            {
+                var details = Import(input);
+                await WriteFileAsync(output, details);
+            }
 #if DEBUG
             Console.Write(_enc.GetString(output.ToArray()));
 #endif
@@ -116,15 +118,12 @@ namespace PipeBenchmark
             return details;
         }
 
-        private async Task WriteFileAsync(Stream output, IEnumerable<Row> details)
+        private async Task WriteFileAsync(StreamWriter output, IEnumerable<Row> details)
         {
-            using (var sw = new MockStreamWriter(output, _enc))
+            foreach (var d in details)
             {
-                foreach (var d in details)
-                {
-                    var line = $"{d.Data},{d.Header01}{d.Header02}{d.Header03}{d.Header04}{d.Header05}{d.Header06}{d.Header07},{d.Footer01}{d.Footer02}{d.Footer03}{d.Footer04}{d.Footer05}{d.Footer06}{d.Footer07}{d.Footer08}";
-                    await sw.WriteLineAsync(line);
-                }
+                var line = $"{d.Data},{d.Header01}{d.Header02}{d.Header03}{d.Header04}{d.Header05}{d.Header06}{d.Header07},{d.Footer01}{d.Footer02}{d.Footer03}{d.Footer04}{d.Footer05}{d.Footer06}{d.Footer07}{d.Footer08}";
+                await output.WriteLineAsync(line);
             }
         }
 
