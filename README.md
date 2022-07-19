@@ -1,9 +1,9 @@
 # PipeBenchmark
 
-|                     Method |      Mean |     Error |    StdDev | Ratio |      Gen 0 |      Gen 1 |     Gen 2 | Allocated |
-|--------------------------- |----------:|----------:|----------:|------:|-----------:|-----------:|----------:|----------:|
-|       UseStreamReaderAsync | 644.81 ms | 12.566 ms | 14.959 ms |  1.00 | 49000.0000 | 16000.0000 | 4000.0000 |    373 MB |
-|    Pipe_SeqPos_MemoryAsync |  93.94 ms |  1.866 ms |  3.726 ms |  0.14 |  1666.6667 |  1333.3333 | 1333.3333 |    129 MB |
-|    Pipe_SeqPos_StructAsync |  89.44 ms |  1.715 ms |  2.106 ms |  0.14 |  1333.3333 |  1333.3333 | 1333.3333 |    128 MB |
-| Pipe_SeqReader_StructAsync |  86.08 ms |  1.287 ms |  1.204 ms |  0.13 |  1333.3333 |  1333.3333 | 1333.3333 |    128 MB |
-|           ReadStreamStruct |  80.17 ms |  1.572 ms |  3.066 ms |  0.13 |  1571.4286 |  1571.4286 | 1571.4286 |    128 MB |
+|                     Method |       Mean |     Error |     StdDev | Ratio |      Gen 0 |      Gen 1 |     Gen 2 |     Allocated |
+|--------------------------- |-----------:|----------:|-----------:|------:|-----------:|-----------:|----------:|--------------:|
+|       UseStreamReaderAsync | 348.453 ms | 6.9207 ms | 12.3016 ms |  1.00 | 44000.0000 | 15000.0000 | 3000.0000 | 267,951,480 B |
+|    Pipe_SeqPos_MemoryAsync |  12.857 ms | 0.0424 ms |  0.0354 ms |  0.04 |   203.1250 |          - |         - |   1,312,129 B |
+|    Pipe_SeqPos_StructAsync |   8.830 ms | 0.0404 ms |  0.0378 ms |  0.03 |    62.5000 |          - |         - |     448,129 B |
+| Pipe_SeqReader_StructAsync |   7.906 ms | 0.1535 ms |  0.2049 ms |  0.02 |    70.3125 |          - |         - |     446,217 B |
+|           ReadStreamStruct |   5.128 ms | 0.0762 ms |  0.0595 ms |  0.01 |          - |          - |         - |         132 B |
