@@ -6,9 +6,22 @@ using System.Text;
 namespace PipeBenchmark
 {
     [MarkdownExporterAttribute.GitHub]
+    [ShortRunJob]
     [MemoryDiagnoser]
     public class PipeTest
     {
+        public class MockStream : MemoryStream
+        {
+            public override void Write(ReadOnlySpan<byte> buffer) { }
+
+        }
+        public class MockStreamWriter : StreamWriter
+        {
+            public MockStreamWriter(Stream stream, Encoding enc) : base(stream) { }
+            public override async Task WriteLineAsync(string? s)
+                => await Task.Delay(0);
+        }
+
         const string INPUT_FILE = @"data01.dat";
         const int DETAIL_COUNT = 10;
 
@@ -45,7 +58,7 @@ namespace PipeBenchmark
         public async Task UseStreamReaderAsync()
         {
             var input = new MemoryStream(_input);
-            var output = new MemoryStream();
+            var output = new MockStream();
             var details = Import(input);
             await WriteFileAsync(output, details);
 #if DEBUG
@@ -105,7 +118,7 @@ namespace PipeBenchmark
 
         private async Task WriteFileAsync(Stream output, IEnumerable<Row> details)
         {
-            using (var sw = new StreamWriter(output, _enc))
+            using (var sw = new MockStreamWriter(output, _enc))
             {
                 foreach (var d in details)
                 {
@@ -141,7 +154,7 @@ namespace PipeBenchmark
         public async Task Pipe_SeqPos_MemoryAsync()
         {
             var input = new MemoryStream(_input);
-            var output = new MemoryStream();
+            var output = new MockStream();
 
             var pipe = new Pipe();
             var writing = FillPipeAsync(input, pipe.Writer);
@@ -220,7 +233,7 @@ namespace PipeBenchmark
         public async Task Pipe_SeqPos_StructAsync()
         {
             var input = new MemoryStream(_input);
-            var output = new MemoryStream();
+            var output = new MockStream();
 
             var pipe = new Pipe();
             var writing = FillPipeAsync(input, pipe.Writer);
@@ -278,7 +291,7 @@ namespace PipeBenchmark
         public async Task Pipe_SeqReader_StructAsync()
         {
             var input = new MemoryStream(_input);
-            var output = new MemoryStream();
+            var output = new MockStream();
 
             var pipe = new Pipe();
             var writing = FillPipeAsync(input, pipe.Writer);
@@ -328,7 +341,7 @@ namespace PipeBenchmark
         public void ReadStreamStruct()
         {
             var input = new MemoryStream(_input);
-            var output = new MemoryStream();
+            var output = new MockStream();
             Convert(input, output);
 #if DEBUG
             Console.Write(_enc.GetString(output.ToArray()));
@@ -352,7 +365,6 @@ namespace PipeBenchmark
             }
         }
         #endregion
-
 
         #region Models 
         public class LineMemory
