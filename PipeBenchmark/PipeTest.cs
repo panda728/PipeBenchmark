@@ -12,14 +12,19 @@ namespace PipeBenchmark
     {
         public class MockStream : MemoryStream
         {
+#if DEBUG
+#else
             public override void Write(ReadOnlySpan<byte> buffer) { }
-
+#endif
         }
         public class MockStreamWriter : StreamWriter
         {
-            public MockStreamWriter(Stream stream, Encoding enc) : base(stream) { }
+            public MockStreamWriter(Stream stream, Encoding enc) : base(stream, enc) { }
+#if DEBUG
+#else
             public override async Task WriteLineAsync(string? s)
                 => await Task.Delay(0);
+#endif
         }
 
         const string INPUT_FILE = @"data01.dat";
@@ -58,11 +63,10 @@ namespace PipeBenchmark
         public async Task UseStreamReaderAsync()
         {
             var input = new MemoryStream(_input);
-            using (var output = new MockStreamWriter(new MemoryStream(), _enc))
-            {
-                var details = Import(input);
-                await WriteFileAsync(output, details);
-            }
+            var output = new MemoryStream();
+
+            var details = Import(input);
+            await WriteFileAsync(output, details);
 #if DEBUG
             Console.Write(_enc.GetString(output.ToArray()));
 #endif
@@ -118,12 +122,15 @@ namespace PipeBenchmark
             return details;
         }
 
-        private async Task WriteFileAsync(StreamWriter output, IEnumerable<Row> details)
+        private async Task WriteFileAsync(Stream output, IEnumerable<Row> details)
         {
-            foreach (var d in details)
+            using (var sw = new MockStreamWriter(output, _enc))
             {
-                var line = $"{d.Data},{d.Header01}{d.Header02}{d.Header03}{d.Header04}{d.Header05}{d.Header06}{d.Header07},{d.Footer01}{d.Footer02}{d.Footer03}{d.Footer04}{d.Footer05}{d.Footer06}{d.Footer07}{d.Footer08}";
-                await output.WriteLineAsync(line);
+                foreach (var d in details)
+                {
+                    var line = $"{d.Data},{d.Header01}{d.Header02}{d.Header03}{d.Header04}{d.Header05}{d.Header06}{d.Header07},{d.Footer01}{d.Footer02}{d.Footer03}{d.Footer04}{d.Footer05}{d.Footer06}{d.Footer07}{d.Footer08}";
+                    await sw.WriteLineAsync(line);
+                }
             }
         }
 
